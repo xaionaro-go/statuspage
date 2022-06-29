@@ -9,7 +9,7 @@ import (
 	prometheusModels "github.com/prometheus/client_model/go"
 	"github.com/prometheus/common/expfmt"
 	"github.com/stretchr/testify/assert"
-	"github.com/trafficstars/metrics"
+	"github.com/xaionaro-go/metrics"
 )
 
 type testPrometheusEncoder struct {

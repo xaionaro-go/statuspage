@@ -17,8 +17,7 @@ import (
 	"github.com/modern-go/reflect2"
 	prometheusModels "github.com/prometheus/client_model/go"
 	"github.com/prometheus/common/expfmt"
-
-	"github.com/trafficstars/metrics"
+	"github.com/xaionaro-go/metrics"
 )
 
 const (
@@ -36,11 +35,11 @@ var (
 // * internal logic: it calls different `runtime.*()` functions
 // * metrics registry of module "github.com/trafficstars/metrics"
 // * custom metrics which could be added via `AddCustomMetricsHook()`
-func getStatus() map[string]interface{} {
+func getStatus(registry *metrics.Registry) map[string]interface{} {
 	result := map[string]interface{}{}
 
 	// Getting metrics from the registry (see "github.com/trafficstars/metrics")
-	result[`metrics`] = metrics.List()
+	result[`metrics`] = registry.List()
 
 	// Getting obvious metrics from "runtime"
 	memStats := &runtime.MemStats{}
@@ -369,12 +368,12 @@ func writeMetricsPrometheus(encoder encoder, prefix string, m map[string]interfa
 }
 
 // WriteMetricsPrometheus write all the metrics via writer in prometheus format.
-func WriteMetricsPrometheus(writer io.Writer) error {
+func WriteMetricsPrometheus(writer io.Writer, registry *metrics.Registry) error {
 	// Just create the prometheus encoder...
 	prometheusEncoder := expfmt.NewEncoder(writer, PrometheusFormat)
 
 	// ... Get all the metrics...
-	metrics := getStatus()
+	metrics := getStatus(registry)
 
 	// ... And write them via the encoder
 	writeMetricsPrometheus(prometheusEncoder, ``, metrics)
@@ -382,8 +381,8 @@ func WriteMetricsPrometheus(writer io.Writer) error {
 }
 
 // WriteMetricsJSON write all the metrics via writer in JSON format.
-func WriteMetricsJSON(writer io.Writer) error {
-	return json.NewEncoder(writer).Encode(getStatus())
+func WriteMetricsJSON(writer io.Writer, registry *metrics.Registry) error {
+	return json.NewEncoder(writer).Encode(getStatus(registry))
 }
 
 // AddCustomMetricsHook adds a new hook that will be called everytime to collect additional metrics when function
